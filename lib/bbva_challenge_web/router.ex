@@ -5,11 +5,15 @@ defmodule BbvaChallengeWeb.Router do
 
   pipeline :browser do
     plug :accepts, ["html"]
-    plug :fetch_session
-    plug :fetch_live_flash
-    plug :put_root_layout, html: {BbvaChallengeWeb.Layouts, :root}
-    plug :protect_from_forgery
-    plug :put_secure_browser_headers
+  end
+
+  scope "/pay", BbvaChallengeWeb do
+    # :browser because we’ll return HTML
+    pipe_through :browser
+
+    get "/sim/:id", FakePayController, :show
+    post "/sim/:id", FakePayController, :process
+    get "/sim/:id/success", FakePayController, :success
   end
 
   pipeline :api do

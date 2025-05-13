@@ -4,7 +4,6 @@ defmodule BbvaChallengeWeb.PaymentRequestController do
   alias BbvaChallenge.Payments
   alias BbvaChallenge.Payments.PaymentRequest
   alias BbvaChallenge.Pos
-  alias BbvaChallenge.Payments.PayProvider
   alias EQRCode
 
   action_fallback BbvaChallengeWeb.FallbackController
@@ -17,19 +16,18 @@ defmodule BbvaChallengeWeb.PaymentRequestController do
   def create(conn, %{"payment_request" => %{"amount" => amount}}) do
     user = conn.assigns.current_user
 
-    with {:ok, cash_box} <- Pos.get_open_box(user.id),
-         {:ok, pay_url} <-
-           PayProvider.create_session(%{
-             amount: amount,
-             currency: "MXN",
-             metadata: %{user_id: user.id, box_id: cash_box.id}
-           }) do
-      qr_svg = pay_url |> EQRCode.encode() |> EQRCode.svg()
+    with {:ok, cash_box} <- Pos.get_open_box(user.id) do
+      id = Ecto.UUID.generate()
+      pr_url = BbvaChallengeWeb.Endpoint.url() <> "/pay/sim/" <> id
+      qr_svg = pr_url |> EQRCode.encode() |> EQRCode.svg()
 
+      # 1) Primero creamos el registro SIN pay_url/qr_svg
       attrs = %{
+        # pasamos el id manualmente
+        id: id,
         amount: amount,
         currency: "MXN",
-        pay_url: pay_url,
+        pay_url: pr_url,
         qr_svg: qr_svg,
         account_id: cash_box.account_id,
         cash_box_id: cash_box.id,
@@ -38,12 +36,23 @@ defmodule BbvaChallengeWeb.PaymentRequestController do
 
       case Payments.create_payment_request(attrs) do
         {:ok, pr} ->
+          # 2) Generamos la URL pública del checkout ficticio
+          pr_url = BbvaChallengeWeb.Endpoint.url() <> "/pay/sim/" <> pr.id
+          qr_svg = pr_url |> EQRCode.encode() |> EQRCode.svg()
+
+          # 3) Actualizamos el registro con URL y QR definitivos
+          {:ok, pr} =
+            Payments.update_payment_request(pr, %{
+              pay_url: pr_url,
+              qr_svg: qr_svg
+            })
+
           conn
           |> put_status(:created)
           |> render(:show, payment_request: pr)
 
         {:error, changeset} ->
-          conn |> put_status(:unprocessable_entity) |> render(:error, changeset: changeset)
+          {:error, changeset}
       end
     else
       {:error, :no_open_box} ->
