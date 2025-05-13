@@ -3,6 +3,8 @@ defmodule BbvaChallenge.Accounts.User do
   import Ecto.Changeset
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
+  @roles ~w(administrador empleado)a
+
   schema "users" do
     field :name, :string
     field :email, :string
@@ -10,6 +12,9 @@ defmodule BbvaChallenge.Accounts.User do
     field :hashed_password, :string, redact: true
     field :current_password, :string, virtual: true, redact: true
     field :confirmed_at, :utc_datetime
+    field :role, Ecto.Enum, values: @roles
+
+    belongs_to :company, BbvaChallenge.Businesses.Company, type: :binary_id
 
     timestamps(type: :utc_datetime)
   end
@@ -39,7 +44,9 @@ defmodule BbvaChallenge.Accounts.User do
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:name, :email, :password])
+    |> cast(attrs, [:name, :email, :password, :role, :company_id])
+    |> validate_required([:company_id])
+    |> assoc_constraint(:company)
     |> validate_name(opts)
     |> validate_email(opts)
     |> validate_password(opts)

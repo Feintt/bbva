@@ -42,5 +42,12 @@ defmodule BbvaChallengeWeb.Router do
     pipe_through :api_auth
     get "/users/me", UserSessionController, :get
     delete "/users/logout", UserSessionController, :delete
+    resources "/companies", CompanyController, except: [:new, :edit]
+    resources "/accounts", AccountController, except: [:new, :edit]
+    resources "/transactions", TransactionController, except: [:new, :edit]
+    resources "/cash_boxes", CashBoxController, except: [:new, :edit]
+    resources "/cash_movements", CashMovementController, except: [:new, :edit]
+    resources "/pos_terminals", TerminalController, except: [:new, :edit]
+    resources "/terminal_assignments", TerminalAssignmentController, except: [:new, :edit]
   end
 end
