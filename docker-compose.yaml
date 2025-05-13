@@ -1,0 +1,14 @@
+services:
+  bbva_db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: bbva_challenge_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - bbva_db_data:/var/lib/postgresql/data
+
+volumes:
+  bbva_db_data:
