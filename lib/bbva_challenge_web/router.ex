@@ -49,5 +49,11 @@ defmodule BbvaChallengeWeb.Router do
     resources "/cash_movements", CashMovementController, except: [:new, :edit]
     resources "/pos_terminals", TerminalController, except: [:new, :edit]
     resources "/terminal_assignments", TerminalAssignmentController, except: [:new, :edit]
+    resources "/payment_requests", PaymentRequestController, except: [:new, :edit]
+    resources "/webhook_logs", WebhookLogController, except: [:new, :edit]
+  end
+
+  scope "/webhooks", BbvaChallengeWeb do
+    post "/pay_provider", PayProviderWebhookController, :handle
   end
 end

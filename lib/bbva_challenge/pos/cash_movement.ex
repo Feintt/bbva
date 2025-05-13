@@ -16,22 +16,23 @@ defmodule BbvaChallenge.Pos.CashMovement do
 
     belongs_to :cash_box, BbvaChallenge.Pos.CashBox
     belongs_to :transaction, BbvaChallenge.Accounting.Transaction
+    belongs_to :payment_request, BbvaChallenge.Payments.PaymentRequest
 
     timestamps(type: :utc_datetime)
   end
 
   @doc false
-  def changeset(cash_movement, attrs) do
-    cash_movement
+  def changeset(cm, attrs) do
+    cm
     |> cast(attrs, [
       :type,
       :payment_method,
       :amount,
       :description,
       :date,
-      # 👈 ahora sí
       :cash_box_id,
-      :transaction_id
+      :transaction_id,
+      :payment_request_id
     ])
     |> validate_required([
       :type,
@@ -39,11 +40,11 @@ defmodule BbvaChallenge.Pos.CashMovement do
       :amount,
       :description,
       :date,
-      # 👈 ahora sí
       :cash_box_id,
       :transaction_id
     ])
     |> assoc_constraint(:cash_box)
     |> assoc_constraint(:transaction)
+    |> assoc_constraint(:payment_request)
   end
 end

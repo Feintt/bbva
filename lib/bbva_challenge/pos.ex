@@ -145,11 +145,12 @@ defmodule BbvaChallenge.Pos do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_cash_movement(attrs \\ %{}) do
-    %CashMovement{}
-    |> CashMovement.changeset(attrs)
-    |> Repo.insert()
-  end
+  def create_cash_movement(attrs \\ %{}),
+    do:
+      BbvaChallenge.Pos.CashMovement
+      |> struct()
+      |> BbvaChallenge.Pos.CashMovement.changeset(attrs)
+      |> Repo.insert()
 
   @doc """
   Updates a cash_movement.
@@ -388,5 +389,18 @@ defmodule BbvaChallenge.Pos do
   """
   def change_terminal_assignment(%TerminalAssignment{} = terminal_assignment, attrs \\ %{}) do
     TerminalAssignment.changeset(terminal_assignment, attrs)
+  end
+
+  @doc """
+  Devuelve `{:ok, caja}` si el usuario tiene una caja abierta.
+  """
+  def get_open_box(user_id) do
+    CashBox
+    |> where([c], c.user_id == ^user_id and c.state == :abierta)
+    |> Repo.one()
+    |> case do
+      nil -> {:error, :no_open_box}
+      box -> {:ok, box}
+    end
   end
 end
