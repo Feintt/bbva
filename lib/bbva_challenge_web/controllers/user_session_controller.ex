@@ -2,28 +2,48 @@ defmodule BbvaChallengeWeb.UserSessionController do
   use BbvaChallengeWeb, :controller
 
   alias BbvaChallenge.Accounts
-  alias BbvaChallengeWeb.UserAuth
 
-  def new(conn, _params) do
-    render(conn, :new, error_message: nil)
+  def get(conn, _params) do
+    user = conn.assigns[:current_user]
+
+    if user do
+      conn
+      |> put_status(:ok)
+      |> json(%{user: %{id: user.id, email: user.email}})
+    else
+      conn
+      |> put_status(:unauthorized)
+      |> json(%{error: "Unauthorized"})
+    end
   end
 
-  def create(conn, %{"user" => user_params}) do
-    %{"email" => email, "password" => password} = user_params
+  def create(conn, %{"user" => %{"email" => email, "password" => password}}) do
+    case Accounts.get_user_by_email_and_password(email, password) do
+      nil ->
+        conn
+        |> put_status(:unauthorized)
+        |> json(%{error: "Invalid email or password"})
 
-    if user = Accounts.get_user_by_email_and_password(email, password) do
-      conn
-      |> put_flash(:info, "Welcome back!")
-      |> UserAuth.log_in_user(user, user_params)
-    else
-      # In order to prevent user enumeration attacks, don't disclose whether the email is registered.
-      render(conn, :new, error_message: "Invalid email or password")
+      user ->
+        {:ok, token} = Accounts.create_user_api_token(user)
+
+        conn
+        |> put_status(:ok)
+        |> json(%{token: token})
     end
   end
 
   def delete(conn, _params) do
-    conn
-    |> put_flash(:info, "Logged out successfully.")
-    |> UserAuth.log_out_user()
+    current_user = conn.assigns[:current_user]
+    IO.inspect(current_user, label: "My user")
+
+    with {:ok, _msg} <- Accounts.delete_user_api_token(current_user) do
+      json(conn, %{message: "Logged out"})
+    else
+      {:error, message} ->
+        conn
+        |> put_status(:unauthorized)
+        |> json(%{error: message})
+    end
   end
 end

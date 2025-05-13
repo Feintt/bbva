@@ -27,6 +27,21 @@ defmodule BbvaChallenge.Accounts do
   end
 
   @doc """
+  Elimina un token API (Bearer) devolviendo:
+
+    * `{:ok, "Deleted"}`     – si se borró
+    * `{:error, "Not found"}` – si no existía
+  """
+  def delete_user_api_token(%User{id: user_id} = _user) do
+    Repo.delete_all(
+      from ut in UserToken,
+        where: ut.user_id == ^user_id and ut.context == "api-token"
+    )
+
+    {:ok, "Deleted"}
+  end
+
+  @doc """
   Gets a user by email and password.
 
   ## Examples
@@ -359,7 +374,12 @@ defmodule BbvaChallenge.Accounts do
   The token returned must be saved somewhere safe.
   This token cannot be recovered from the database.
   """
-  def create_user_api_token(user) do
+  def create_user_api_token(%User{id: user_id} = user) do
+    Repo.delete_all(
+      from ut in UserToken,
+        where: ut.user_id == ^user_id and ut.context == "api-token"
+    )
+
     {encoded_token, user_token} = UserToken.build_email_token(user, "api-token")
     Repo.insert!(user_token)
     {:ok, encoded_token}

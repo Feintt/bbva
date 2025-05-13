@@ -10,7 +10,6 @@ defmodule BbvaChallengeWeb.Router do
     plug :put_root_layout, html: {BbvaChallengeWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
-    plug :fetch_current_user
   end
 
   pipeline :api do
@@ -36,9 +35,12 @@ defmodule BbvaChallengeWeb.Router do
   scope "/api", BbvaChallengeWeb do
     pipe_through [:api]
     post "/users/register", UserRegistrationController, :create
+    post "/users/login", UserSessionController, :create
   end
 
   scope "/api", BbvaChallengeWeb do
     pipe_through :api_auth
+    get "/users/me", UserSessionController, :get
+    delete "/users/logout", UserSessionController, :delete
   end
 end
