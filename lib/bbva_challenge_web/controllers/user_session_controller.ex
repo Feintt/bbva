@@ -9,7 +9,7 @@ defmodule BbvaChallengeWeb.UserSessionController do
     if user do
       conn
       |> put_status(:ok)
-      |> json(%{user: %{id: user.id, email: user.email}})
+      |> json(%{user: %{id: user.id, email: user.email, name: user.name}})
     else
       conn
       |> put_status(:unauthorized)
