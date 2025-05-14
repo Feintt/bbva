@@ -1,18 +1,26 @@
 alias BbvaChallenge.Repo
 
-# Contexts (ajusta si renombraste)
-alias BbvaChallenge.Accounts
-alias BbvaChallenge.Accounting
-alias BbvaChallenge.Pos
+# Contexts
+alias BbvaChallenge.{Accounts, Accounting, Pos}
 
-# Schemas claros
+# Schemas
 alias BbvaChallenge.Businesses.Company
 alias BbvaChallenge.Accounting.{Account, Transaction}
 alias BbvaChallenge.Pos.{CashBox, CashMovement, Terminal, TerminalAssignment}
 
 # -------------------------------------------------------------------
-# 📌 1. Datos base
-company_attrs = %{name: "Seed Corp", rfc: "SEED123456XYZ"}
+# 📌 1. Datos base de la empresa + docs
+company_attrs = %{
+  name: "Seed Corp",
+  rfc: "SEED123456XYZ",
+  # <─ enum
+  society_type: :sa_de_cv,
+  fiscal_address: "Av. Siempre Viva 742, CDMX",
+  # <─ enum
+  industry: :tecnologia,
+  official_id: "/uploads/seedcorp/ine.pdf",
+  e_signature: "/uploads/seedcorp/efirma.zip"
+}
 
 admin_attrs = %{
   email: "admin@seedcorp.com",
@@ -70,7 +78,7 @@ end)
     description: "Venta inicial (seed)",
     date: DateTime.utc_now(),
     account_id: acct.id,
-    # 👈  ahora el user queda ligado
+    # ahora ligado al usuario
     user_id: admin.id
   })
 end)

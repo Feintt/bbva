@@ -50,9 +50,46 @@ defmodule BbvaChallenge.Businesses do
 
   """
   def create_company(attrs \\ %{}) do
-    %Company{}
-    |> Company.changeset(attrs)
-    |> Repo.insert()
+    with {:ok, file_paths} <- persist_files(attrs, ~w(official_id e_signature)a),
+         changeset <- Company.changeset(%Company{}, Map.merge(attrs, file_paths)),
+         {:ok, company} <- Repo.insert(changeset) do
+      {:ok, company}
+    else
+      {:error, _} = err -> err
+    end
+  end
+
+  # ---------- helpers ----------
+  @upload_dir Application.compile_env(
+                :bbva_challenge,
+                :company_upload_dir,
+                Application.app_dir(:bbva_challenge, "priv/static/uploads/companies")
+              )
+
+  defp persist_files(attrs, keys) do
+    Enum.reduce_while(keys, {:ok, %{}}, fn k, {:ok, acc} ->
+      case Map.get(attrs, Atom.to_string(k)) || Map.get(attrs, k) do
+        %Plug.Upload{filename: fname, path: tmp} ->
+          File.mkdir_p!(@upload_dir)
+          ext = Path.extname(fname)
+          dest = Path.join(@upload_dir, "#{Ecto.UUID.generate()}#{ext}")
+
+          case File.cp(tmp, dest) do
+            :ok ->
+              {:cont, {:ok, Map.put(acc, k, String.replace(dest, ~r|.*priv/static|, "/uploads"))}}
+
+            error ->
+              {:halt, error}
+          end
+
+        # si no se envió el campo, seguimos sin error
+        nil ->
+          {:cont, {:ok, acc}}
+
+        _ ->
+          {:halt, {:error, "#{k} debe ser un archivo"}}
+      end
+    end)
   end
 
   @doc """

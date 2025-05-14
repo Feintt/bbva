@@ -20,10 +20,10 @@ defmodule BbvaChallengeWeb.Endpoint do
   # You should set gzip to true if you are running phx.digest
   # when deploying your static files in production.
   plug Plug.Static,
-    at: "/",
-    from: :bbva_challenge,
+    at: "/uploads",
+    from: {:bbva_challenge, "priv/static/uploads"},
     gzip: false,
-    only: BbvaChallengeWeb.static_paths()
+    cache_control_for_etags: "public, max-age=604800"
 
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.

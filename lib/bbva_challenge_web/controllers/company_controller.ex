@@ -11,12 +11,22 @@ defmodule BbvaChallengeWeb.CompanyController do
     render(conn, :index, companies: companies)
   end
 
-  def create(conn, %{"company" => company_params}) do
-    with {:ok, %Company{} = company} <- Businesses.create_company(company_params) do
-      conn
-      |> put_status(:created)
-      |> put_resp_header("location", ~p"/api/companies/#{company}")
-      |> render(:show, company: company)
+  def create(conn, %{"company" => params}) do
+    case BbvaChallenge.Businesses.create_company(params) do
+      {:ok, company} ->
+        conn
+        |> put_status(:created)
+        |> put_resp_header("location", ~p"/api/companies/#{company}")
+        |> render(:show, company: company)
+
+      {:error, %Ecto.Changeset{} = cs} ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> render(:error, changeset: cs)
+
+      {:error, reason} ->
+        # error fuera del changeset (ej. al copiar archivo)
+        conn |> send_resp(500, "upload error: #{inspect(reason)}")
     end
   end
 
