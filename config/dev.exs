@@ -24,7 +24,9 @@ config :bbva_challenge, BbvaChallengeWeb.Endpoint,
   code_reloader: true,
   debug_errors: true,
   secret_key_base: "g7jmaglzK/dxTvsS+phuZdilMLfGRa/u4rgKktXiOnuuz+PSUx+ZZHXnmL7DTCql",
-  watchers: []
+  watchers: [
+    # npm: ["run", "dev", cd: Path.expand("../bbva-qr-cobro-facil", __DIR__)]
+  ]
 
 # ## SSL Support
 #

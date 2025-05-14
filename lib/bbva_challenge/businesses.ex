@@ -68,7 +68,9 @@ defmodule BbvaChallenge.Businesses do
 
   defp persist_files(attrs, keys) do
     Enum.reduce_while(keys, {:ok, %{}}, fn k, {:ok, acc} ->
-      case Map.get(attrs, Atom.to_string(k)) || Map.get(attrs, k) do
+      k_str = Atom.to_string(k)
+
+      case Map.get(attrs, k_str) do
         %Plug.Upload{filename: fname, path: tmp} ->
           File.mkdir_p!(@upload_dir)
           ext = Path.extname(fname)
@@ -76,18 +78,16 @@ defmodule BbvaChallenge.Businesses do
 
           case File.cp(tmp, dest) do
             :ok ->
-              {:cont, {:ok, Map.put(acc, k, String.replace(dest, ~r|.*priv/static|, "/uploads"))}}
+              public = String.replace(dest, ~r|.*priv/static|, "/uploads")
+              {:cont, {:ok, Map.put(acc, k_str, public)}}
 
-            error ->
-              {:halt, error}
+            {:error, reason} ->
+              {:halt, {:error, reason}}
           end
 
         # si no se envió el campo, seguimos sin error
-        nil ->
-          {:cont, {:ok, acc}}
-
         _ ->
-          {:halt, {:error, "#{k} debe ser un archivo"}}
+          {:cont, {:ok, acc}}
       end
     end)
   end

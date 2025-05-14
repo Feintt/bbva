@@ -230,6 +230,16 @@ defmodule BbvaChallenge.Accounts do
     end
   end
 
+  def update_user_company(user, company_id) do
+    Ecto.Multi.new()
+    |> Ecto.Multi.update(:user, User.registration_changeset(user, %{company_id: company_id}))
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{user: user}} -> {:ok, user}
+      {:error, :user, changeset, _} -> {:error, changeset}
+    end
+  end
+
   ## Session
 
   @doc """

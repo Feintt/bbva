@@ -11,6 +11,20 @@ defmodule BbvaChallengeWeb.Endpoint do
     same_site: "Lax"
   ]
 
+  # 1) Servir todos los assets estáticos del build de React / tus css/js
+  plug Plug.Static,
+    at: "/",
+    from: :bbva_challenge,
+    gzip: false,
+    only: ~w(css fonts images js favicon.ico robots.txt pay-ui)
+
+  # 2) Luego tus uploads “dinámicos”
+  plug Plug.Static,
+    at: "/uploads",
+    from: {:bbva_challenge, "priv/static/uploads"},
+    gzip: false,
+    cache_control_for_etags: "public, max-age=604800"
+
   # socket "/live", Phoenix.LiveView.Socket,
   #   websocket: [connect_info: [session: @session_options]],
   #   longpoll: [connect_info: [session: @session_options]]
@@ -19,11 +33,6 @@ defmodule BbvaChallengeWeb.Endpoint do
   #
   # You should set gzip to true if you are running phx.digest
   # when deploying your static files in production.
-  plug Plug.Static,
-    at: "/uploads",
-    from: {:bbva_challenge, "priv/static/uploads"},
-    gzip: false,
-    cache_control_for_etags: "public, max-age=604800"
 
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.

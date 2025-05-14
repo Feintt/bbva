@@ -1,6 +1,7 @@
 defmodule BbvaChallengeWeb.CompanyController do
   use BbvaChallengeWeb, :controller
 
+  alias BbvaChallenge.Accounts
   alias BbvaChallenge.Businesses
   alias BbvaChallenge.Businesses.Company
 
@@ -12,8 +13,12 @@ defmodule BbvaChallengeWeb.CompanyController do
   end
 
   def create(conn, %{"company" => params}) do
+    user = conn.assigns.current_user
+
     case BbvaChallenge.Businesses.create_company(params) do
       {:ok, company} ->
+        Accounts.update_user_company(user, company.id)
+
         conn
         |> put_status(:created)
         |> put_resp_header("location", ~p"/api/companies/#{company}")

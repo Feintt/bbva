@@ -45,7 +45,6 @@ defmodule BbvaChallenge.Accounts.User do
   def registration_changeset(user, attrs, opts \\ []) do
     user
     |> cast(attrs, [:name, :email, :password, :role, :company_id])
-    |> validate_required([:company_id])
     |> assoc_constraint(:company)
     |> validate_name(opts)
     |> validate_email(opts)

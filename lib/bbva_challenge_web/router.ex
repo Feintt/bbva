@@ -60,4 +60,9 @@ defmodule BbvaChallengeWeb.Router do
   scope "/webhooks", BbvaChallengeWeb do
     post "/pay_provider", PayProviderWebhookController, :handle
   end
+
+  scope "/", BbvaChallengeWeb do
+    # Este controlador simplemente sirve el index.html estático:
+    get "/pay-ui/*path", PageController, :spa
+  end
 end
