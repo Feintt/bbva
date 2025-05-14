@@ -22,6 +22,8 @@ defmodule BbvaChallengeWeb.FakePayController do
   end
 
   def success(conn, %{"id" => _id}) do
-    render(conn, BbvaChallengeWeb.FakePayHTML, :success, %{})
+    conn
+    |> put_view(BbvaChallengeWeb.FakePayHTML)
+    |> render(:success)
   end
 end
