@@ -8,10 +8,11 @@ defmodule BbvaChallengeWeb.Router do
   end
 
   scope "/pay", BbvaChallengeWeb do
-    # :browser because we’ll return HTML
     pipe_through :browser
 
-    get "/sim/:id", FakePayController, :show
+    # Al GET a /pay/sim/loquequiera vamos a servir siempre el index de React
+    get "/sim/*path", FakePayController, :show
+    # El POST de “procesar pago” lo dejamos igual
     post "/sim/:id", FakePayController, :process
     get "/sim/:id/success", FakePayController, :success
   end

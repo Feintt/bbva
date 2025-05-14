@@ -19,6 +19,7 @@ config :bbva_challenge, BbvaChallenge.Repo,
 config :bbva_challenge, BbvaChallengeWeb.Endpoint,
   # Binding to loopback ipv4 address prevents access from other machines.
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
+  url: [scheme: "https", host: "f736-189-201-56-227.ngrok-free.app", port: 443],
   http: [ip: {127, 0, 0, 1}, port: 4000],
   check_origin: false,
   code_reloader: true,
